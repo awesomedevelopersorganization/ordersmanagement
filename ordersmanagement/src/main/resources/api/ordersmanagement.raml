@@ -1,0 +1,16 @@
+#%RAML 1.0
+title: ordersmanagement
+description: This API is used for Order Management
+/getordersbycustomer:
+  description: This endpoint/service is used to fetch all the customer details and the orders placed by given customer
+  get:
+    queryParameters:
+      customerid:
+        description: This is the customer ID using which all order details are fetched
+        required: true
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include getorders_sampleresponse.json
+              

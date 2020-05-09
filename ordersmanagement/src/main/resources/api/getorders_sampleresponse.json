@@ -1,0 +1,30 @@
+{
+"customer" : {
+"id": "C1",
+"name": "Sravan Panditi",
+"phonenumber":123
+},
+"orders":
+[
+{
+"orderid":101,
+"product" : {
+"productid":"p1",
+"productname":"mobile",
+"producttype": "electronics"
+},
+"quantity":2,
+"amount":300
+},
+{
+"orderid":102,
+"product" : {
+"productid":"p2",
+"productname":"Ariel",
+"producttype": "household"
+},
+"quantity":3,
+"amount":500
+}
+]
+}
