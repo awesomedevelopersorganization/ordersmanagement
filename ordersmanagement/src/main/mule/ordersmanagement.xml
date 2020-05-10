@@ -131,7 +131,10 @@ output application/json
     </flow>
     <flow name="get:\getordersbycustomer:ordersmanagement-config">
 		<db:select doc:name="Select" doc:id="725f45aa-252f-485f-967c-d15fc2d6d3b4" config-ref="Database_Config">
-			<db:sql >select * from sravan.orders</db:sql>
+			<db:sql >select * from sravan.customers where custid=:id</db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"id" :attributes.queryParams.customerid
+}]]]></db:input-parameters>
 		</db:select>
 		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="ff451c60-383a-4079-9cd9-3bdb15ae0602">
             <ee:message>
