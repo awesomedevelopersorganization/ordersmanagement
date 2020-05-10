@@ -130,19 +130,22 @@ output application/json
         </error-handler>
     </flow>
     <flow name="get:\getordersbycustomer:ordersmanagement-config">
-		<db:select doc:name="Select" doc:id="725f45aa-252f-485f-967c-d15fc2d6d3b4" config-ref="Database_Config">
+		<db:select doc:name="Get Customer Details" doc:id="725f45aa-252f-485f-967c-d15fc2d6d3b4" config-ref="Database_Config">
 			<db:sql >select * from sravan.customers where custid=:id</db:sql>
 			<db:input-parameters ><![CDATA[#[{
 	"id" :attributes.queryParams.customerid
 }]]]></db:input-parameters>
 		</db:select>
-		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="ff451c60-383a-4079-9cd9-3bdb15ae0602">
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="ff451c60-383a-4079-9cd9-3bdb15ae0602" doc:name="Create Customers JSON">
             <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
+            </ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="customerdata" ><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-payload>
-            </ee:message>
+payload]]></ee:set-variable>
+			</ee:variables>
         </ee:transform>
+		<set-payload value="Success" doc:name="Set Payload" doc:id="fa1b6ee2-b9e0-4932-bef0-1a8b53977bb8" />
     </flow>
 </mule>
