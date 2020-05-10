@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd ">
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
     <http:listener-config name="ordersmanagement-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
     <apikit:config name="ordersmanagement-config" api="ordersmanagement.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-    <flow name="ordersmanagement-main">
+    <db:config name="Database_Config" doc:name="Database Config" doc:id="1540275f-8b48-440b-89b8-55dd40a5293a" >
+		<db:my-sql-connection host="${MySQL.host}" port="${MySQL.port}" user="${MySQL.username}" password="${MySQL.password}" database="${MySQL.dbname}"/>
+	</db:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="da96135c-2d52-459e-99d4-b821c3af9e86" file="config.yaml" />
+	<flow name="ordersmanagement-main">
         <http:listener config-ref="ordersmanagement-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers>#[vars.outboundHeaders default {}]</http:headers>
@@ -124,40 +130,15 @@ output application/json
         </error-handler>
     </flow>
     <flow name="get:\getordersbycustomer:ordersmanagement-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="ff451c60-383a-4079-9cd9-3bdb15ae0602">
+		<db:select doc:name="Select" doc:id="725f45aa-252f-485f-967c-d15fc2d6d3b4" config-ref="Database_Config">
+			<db:sql >select * from sravan.orders</db:sql>
+		</db:select>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="ff451c60-383a-4079-9cd9-3bdb15ae0602">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{
-  customer: {
-    id: "C1",
-    name: "Sravan Panditi",
-    phonenumber: 123
-  },
-  orders: [
-    {
-      orderid: 101,
-      product: {
-        productid: "p1",
-        productname: "mobile",
-        producttype: "electronics"
-      },
-      quantity: 2,
-      amount: 300
-    }, 
-    {
-      orderid: 102,
-      product: {
-        productid: "p2",
-        productname: "Ariel",
-        producttype: "household"
-      },
-      quantity: 3,
-      amount: 500
-    }
-  ]
-}]]></ee:set-payload>
+payload]]></ee:set-payload>
             </ee:message>
         </ee:transform>
     </flow>
