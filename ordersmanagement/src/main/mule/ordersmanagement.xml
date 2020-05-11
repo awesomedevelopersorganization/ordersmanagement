@@ -163,6 +163,75 @@ output application/json
 payload]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<set-payload value="Success" doc:name="Set Payload" doc:id="fa1b6ee2-b9e0-4932-bef0-1a8b53977bb8" />
+		<ee:transform doc:name="Initialize Products output" doc:id="d7485ed0-8702-41c0-a98d-b27671dcdb58" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="productsoutput" ><![CDATA[%dw 2.0
+output application/java
+---
+[]]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="7e7e7021-cd3c-4a30-870d-2867781dd8fe" collection="#[vars.ordersoutput]">
+			<db:select doc:name="Read product details" doc:id="a64d15ce-a470-4b92-8c2e-66156fd93f1f" config-ref="Database_Config">
+				<db:sql >select * from products where productid=:id</db:sql>
+				<db:input-parameters ><![CDATA[#[{
+	"id" : payload.productid
+}]]]></db:input-parameters>
+			</db:select>
+			<ee:transform doc:name="Create Product JSON" doc:id="6c25fb7e-e8e5-481f-a912-9747e8ee3ed4" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="product" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<ee:transform doc:name="Add current product to productsoutput" doc:id="4ccbca87-6ea4-4e2a-ac78-9572c213a441" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="productsoutput" ><![CDATA[%dw 2.0
+output application/java
+---
+vars.productsoutput + vars.product]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="9bf29b29-d23b-4873-81fd-04d340654e0e" />
+		</foreach>
+		<ee:transform doc:name="Create productsoutput JSON" doc:id="51ecd62e-0f08-4a34-b045-9a25c0d5923a" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="vars.productsoutput" ><![CDATA[%dw 2.0
+output application/json
+---
+flatten(vars.productsoutput)]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Create Final Response" doc:id="b7a2fdf2-d2ca-44a8-9963-7645dba7760c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"customers" : {
+		"id" : vars.customerdata[0].custid,
+		"name" : (vars.customerdata[0].firstname) as String ++ " " ++ (vars.customerdata[0].lastname) as String,
+		"phonenumber" : vars.customerdata[0].phonenumber
+	
+	},
+	"orders" : vars.ordersoutput map () ->
+		{
+			"orderid" : $.orderid,
+			"quantity" : $.quantity,
+			"amount" : $.amount
+		}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
     </flow>
 </mule>
