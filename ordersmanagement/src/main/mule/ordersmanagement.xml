@@ -222,15 +222,16 @@ output application/json
 		"id" : vars.customerdata[0].custid,
 		"name" : (vars.customerdata[0].firstname) as String ++ " " ++ (vars.customerdata[0].lastname) as String,
 		"phonenumber" : vars.customerdata[0].phonenumber
-	
 	},
-	"orders" : vars.ordersoutput map () ->
+	"orders" : vars.ordersoutput map (order,index) ->
 		{
-			"orderid" : $.orderid,
-			"quantity" : $.quantity,
-			"amount" : $.amount
+		"orderid" : order.orderid,
+		"quantity" : order.quantity,
+		"amount" : order.amount,
+		"product" : flatten(flatten(vars.productsoutput filter((product,index) -> ((product.productid[0] ) == order.productid))))
 		}
-}]]></ee:set-payload>
+	}
+]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
     </flow>
