@@ -144,7 +144,7 @@ output application/json
 				<ee:set-variable variableName="customerdata" ><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-variable>
+payload[0]]]></ee:set-variable>
 			</ee:variables>
         </ee:transform>
 		<db:select doc:name="Get Order Details" doc:id="2684f9c4-604f-4812-b1e0-a26e727dcaf2" config-ref="Database_Config">
@@ -200,13 +200,13 @@ output application/java
 vars.productsoutput + vars.product]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
-			<logger level="INFO" doc:name="Logger" doc:id="9bf29b29-d23b-4873-81fd-04d340654e0e" />
 		</foreach>
+		<remove-variable doc:name="Remove Variable_product" doc:id="1fd89555-efa4-4fb6-b2b2-df8740319629" variableName="product"/>
 		<ee:transform doc:name="Create productsoutput JSON" doc:id="51ecd62e-0f08-4a34-b045-9a25c0d5923a" >
 			<ee:message >
 			</ee:message>
 			<ee:variables >
-				<ee:set-variable variableName="vars.productsoutput" ><![CDATA[%dw 2.0
+				<ee:set-variable variableName="productsoutput" ><![CDATA[%dw 2.0
 output application/json
 ---
 flatten(vars.productsoutput)]]></ee:set-variable>
@@ -218,17 +218,22 @@ flatten(vars.productsoutput)]]></ee:set-variable>
 output application/json
 ---
 {
-	"customers" : {
-		"id" : vars.customerdata[0].custid,
-		"name" : (vars.customerdata[0].firstname) as String ++ " " ++ (vars.customerdata[0].lastname) as String,
-		"phonenumber" : vars.customerdata[0].phonenumber
+	"customer" : {
+		"id" : vars.customerdata.custid,
+		"name" : (vars.customerdata.firstname) as String ++ " " ++ (vars.customerdata.lastname) as String,
+		"phonenumber" : vars.customerdata.phonenumber
 	},
 	"orders" : vars.ordersoutput map (order,index) ->
 		{
 		"orderid" : order.orderid,
 		"quantity" : order.quantity,
 		"amount" : order.amount,
-		"product" : flatten(flatten(vars.productsoutput filter((product,index) -> ((product.productid[0] ) == order.productid))))
+		"products" : vars.productsoutput filter $.productid==order.productid map(product,index) -> 
+			{
+				"productid" : product.productid,
+				"productname" : product.productname,
+				"producttype" : product.producttype
+			}
 		}
 	}
 ]]></ee:set-payload>
